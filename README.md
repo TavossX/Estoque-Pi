@@ -1,58 +1,70 @@
-# 📦 Gerenciador de Estoque Online
+# Getting Started with Create React App
 
-![GitHub repo size](https://img.shields.io/github/repo-size/usuario/repositorio)
-![GitHub stars](https://img.shields.io/github/stars/usuario/repositorio?style=social)
-![GitHub license](https://img.shields.io/github/license/usuario/repositorio)
+This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-Um sistema web para gerenciamento eficiente de estoque, desenvolvido como parte do **Projeto Integrador** da **FATEC Jaú**.
+## Available Scripts
 
-## 🚀 Funcionalidades
+In the project directory, you can run:
 
-- 📋 Cadastro de produtos
-- 🔍 Busca e filtragem de itens
-- 📦 Controle de entrada e saída
-- 📊 Relatórios e dashboards
-- 👥 Controle de usuários e permissões
+### `npm start`
 
-## 🛠️ Tecnologias Utilizadas
+Runs the app in the development mode.\
+Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 
-- **Back-end:** .NET MVC com Entity Framework e MongoDB
-- **Front-end:** React com Tailwind CSS
-- **Banco de Dados:** MongoDB
-- **Autenticação:** JWT (JSON Web Token)
-- **Deploy:** Docker e Azure
+The page will reload when you make changes.\
+You may also see any lint errors in the console.
 
-## 📸 Capturas de Tela
+### `npm test`
 
-_Adicione aqui algumas imagens do projeto_
+Launches the test runner in the interactive watch mode.\
+See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
 
-## 🎯 Como Executar o Projeto
+### `npm run build`
 
-1. Clone o repositório:
-   ```bash
-   git clone https://github.com/usuario/repositorio.git
-   ```
-2. Navegue até a pasta do projeto e instale as dependências:
-   ```bash
-   cd repositorio
-   npm install
-   ```
-3. Configure as variáveis de ambiente (_exemplo: .env_)
-4. Inicie o servidor:
-   ```bash
-   npm run dev
-   ```
-5. Acesse o sistema em: `http://localhost:3000`
+Builds the app for production to the `build` folder.\
+It correctly bundles React in production mode and optimizes the build for the best performance.
 
-## 🤝 Contribuição
+The build is minified and the filenames include the hashes.\
+Your app is ready to be deployed!
 
-Sinta-se à vontade para contribuir! Faça um **fork**, crie uma **branch**, implemente a melhoria e abra um **pull request**.
+See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
 
-## 📄 Licença
+### `npm run eject`
 
-Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+**Note: this is a one-way operation. Once you `eject`, you can't go back!**
 
----
+If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
 
-Desenvolvido com ❤️ pela equipe da **FATEC Jaú** 🎓.
+Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
 
+You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+
+## Learn More
+
+You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+
+To learn React, check out the [React documentation](https://reactjs.org/).
+
+### Code Splitting
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+
+### Analyzing the Bundle Size
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+
+### Making a Progressive Web App
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+
+### Advanced Configuration
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+
+### Deployment
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+
+### `npm run build` fails to minify
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
