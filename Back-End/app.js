@@ -4,8 +4,20 @@ const express = require("express");
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const cors = require("cors");
 
 const app = express();
+
+app.use(
+  cors({
+    origin: "http://localhost:3000", // permitir apenas seu frontend
+    methods: ["GET", "POST", "PUT", "DELETE"], // métodos permitidos
+    allowedHeaders: ["Content-Type", "Authorization"], // cabeçalhos permitidos
+    credentials: true, // permitir cookies e credenciais
+  })
+);
+
+app.use(cors());
 
 //Config JSON response
 app.use(express.json());
@@ -51,6 +63,7 @@ function checkToken(req, res, next) {
 //Register User
 app.post("/auth/register", async (req, res) => {
   const { email, password, confirmpassword } = req.body;
+  console.log(req.body);
 
   // Validações
   if (!email) {
@@ -122,7 +135,7 @@ app.post("/auth/login", async (req, res) => {
     const token = jwt.sign({ id: user._id }, secret);
     res.status(200).json({ msg: "Autenticação realizada com sucesso!", token });
   } catch (err) {
-    console.log(error);
+    console.error("Erro no login:", err);
     res.status(500).json({
       msg: "Aconteceu um erro no servidor, tente novamente mais tarde!",
     });
