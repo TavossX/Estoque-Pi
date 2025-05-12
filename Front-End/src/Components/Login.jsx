@@ -1,49 +1,51 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom'
-import { API_URL } from '../Services/Api';
-
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { API_URL } from "../Services/Api";
 
 function Login() {
-  const [usuario, setUsuario] = useState('')
-  const [senha, setSenha] = useState('')
-  const navigate = useNavigate()
+  const [email, setEmail] = useState("");
+  const [senha, setSenha] = useState("");
+  const navigate = useNavigate();
 
   const handleLogin = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
 
     try {
       const response = await fetch(`${API_URL}/login`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          usuario,
+          email,
           senha,
         }),
-      })
+      });
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (response.ok) {
-        console.log('Login bem-sucedido!', data)
-        navigate('/stock')
+        console.log("Login bem-sucedido!", data);
+        navigate("/stock");
       } else {
-        console.error('Erro no login:', data.message)
+        console.error("Erro no login:", data.message);
       }
     } catch (error) {
-      console.error('Erro de conexão:', error)
+      console.error("Erro de conexão:", error);
     }
-  }
+  };
 
   return (
-    <form onSubmit={handleLogin} className="bg-white p-8 rounded shadow-md w-80">
+    <form
+      onSubmit={handleLogin}
+      className="bg-white p-8 rounded shadow-md w-80"
+    >
       <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
       <input
         type="text"
         placeholder="Usuário"
-        value={usuario}
-        onChange={(e) => setUsuario(e.target.value)}
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
         className="w-full p-2 mb-4 border rounded"
       />
       <input
@@ -60,10 +62,13 @@ function Login() {
         Entrar
       </button>
       <p className="mt-4 text-center text-sm">
-        Não tem uma conta? <Link to="/cadastro" className="text-blue-500">Cadastre-se</Link>
+        Não tem uma conta?{" "}
+        <Link to="/cadastro" className="text-blue-500">
+          Cadastre-se
+        </Link>
       </p>
     </form>
-  )
+  );
 }
 
-export default Login
+export default Login;

@@ -1,50 +1,46 @@
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
-import { API_URL } from '../Services/Api'
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { API_URL } from "../Services/Api";
 
 function Register() {
-  const [nome, setNome] = useState('')
-  const [email, setEmail] = useState('')
-  const [senha, setSenha] = useState('')
+  const [email, setEmail] = useState("");
+  const [senha, setSenha] = useState("");
+  const [confirmaSenha, setConfirmaSenha] = useState("");
 
   const handleRegister = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
 
     try {
       const response = await fetch(`${API_URL}/register`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          nome,
           email,
           senha,
+          confirmaSenha,
         }),
-      })
+      });
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (response.ok) {
-        console.log('Cadastro bem-sucedido!', data)
+        console.log("Cadastro bem-sucedido!", data);
       } else {
-        console.error('Erro no cadastro:', data.message)
+        console.error("Erro no cadastro:", data.message);
       }
     } catch (error) {
-      console.error('Erro de conexão:', error)
+      console.error("Erro de conexão:", error);
     }
-  }
+  };
 
   return (
-    <form onSubmit={handleRegister} className="bg-white p-8 rounded shadow-md w-80">
+    <form
+      onSubmit={handleRegister}
+      className="bg-white p-8 rounded shadow-md w-80"
+    >
       <h2 className="text-2xl font-bold mb-6 text-center">Cadastro</h2>
-      <input
-        type="text"
-        placeholder="Nome"
-        value={nome}
-        onChange={(e) => setNome(e.target.value)}
-        className="w-full p-2 mb-4 border rounded"
-      />
       <input
         type="email"
         placeholder="E-mail"
@@ -59,6 +55,13 @@ function Register() {
         onChange={(e) => setSenha(e.target.value)}
         className="w-full p-2 mb-6 border rounded"
       />
+      <input
+        type="password"
+        placeholder="Confirmar Senha"
+        value={senha}
+        onChange={(e) => setConfirmaSenha(e.target.value)}
+        className="w-full p-2 mb-6 border rounded"
+      />
       <button
         type="submit"
         className="w-full bg-green-500 text-white p-2 rounded hover:bg-green-600"
@@ -66,10 +69,13 @@ function Register() {
         Cadastrar
       </button>
       <p className="mt-4 text-center text-sm">
-        Já tem uma conta? <Link to="/" className="text-green-500">Login</Link>
+        Já tem uma conta?{" "}
+        <Link to="/" className="text-green-500">
+          Login
+        </Link>
       </p>
     </form>
-  )
+  );
 }
 
-export default Register
+export default Register;

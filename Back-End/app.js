@@ -4,6 +4,8 @@ const express = require("express");
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const produtoRoutes = require("./routes/produtoRoutes");
+const categoriaRoutes = require("./routes/categoriaRoutes");
 
 const app = express();
 
@@ -12,6 +14,10 @@ app.use(express.json());
 
 //Models
 const User = require("./models/User");
+
+app.use("/api/produtos", produtoRoutes);
+
+app.use("/api/categorias", categoriaRoutes);
 
 // Open Route - Public Route
 app.get("/", (req, res) => {
@@ -132,4 +138,5 @@ app.post("/auth/login", async (req, res) => {
 mongoose.connect("mongodb://localhost:27017/Estoque").then(() => {
   app.listen(3000);
   console.log("Conectado ao MongoDB! 🚀");
+  console.log("Servidor rodando na porta 3000! 🚀");
 });
