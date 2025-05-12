@@ -116,4 +116,4 @@ Contribuições são bem-vindas! Sinta-se livre para abrir issues ou pull reques
 
 **Otavio Martins Ficho**  
 Desenvolvedor Fullstack | Fatec Jahu  
-[LinkedIn](https://www.linkedin.com/otavio-martins2004) · [GitHub](https://github.com/TavossX)
+[LinkedIn](https://www.linkedin.com/in/otavio-martins2004/?originalSubdomain=br) · [GitHub](https://github.com/TavossX)
