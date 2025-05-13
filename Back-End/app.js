@@ -4,12 +4,8 @@ const express = require("express");
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-<<<<<<< HEAD
 const produtoRoutes = require("./routes/produtoRoutes");
 const categoriaRoutes = require("./routes/categoriaRoutes");
-=======
-const cors = require("cors");
->>>>>>> 6ed89c2374a9a078b5df395341876ffff19609b5
 
 const app = express();
 
