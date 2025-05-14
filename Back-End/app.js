@@ -4,21 +4,16 @@ const express = require("express");
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const cors = require("cors");
 const produtoRoutes = require("./routes/produtoRoutes");
 const categoriaRoutes = require("./routes/categoriaRoutes");
 
 const app = express();
 
-app.use(
-  cors({
-    origin: "http://localhost:3000", // permitir apenas seu frontend
-    methods: ["GET", "POST", "PUT", "DELETE"], // métodos permitidos
-    allowedHeaders: ["Content-Type", "Authorization"], // cabeçalhos permitidos
-    credentials: true, // permitir cookies e credenciais
-  })
-);
-
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:3000',
+  credentials: true
+}));
 
 //Config JSON response
 app.use(express.json());
@@ -148,7 +143,7 @@ app.post("/auth/login", async (req, res) => {
 });
 // Conexão com o MongoDB
 mongoose.connect("mongodb://localhost:27017/Estoque").then(() => {
-  app.listen(3000);
+  app.listen(5000);
   console.log("Conectado ao MongoDB! 🚀");
   console.log("Servidor rodando na porta 3000! 🚀");
 });

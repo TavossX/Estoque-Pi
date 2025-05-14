@@ -1,2 +1,2 @@
-export const API_URL = "http://localhost:3000";
-// Otávio, muda essa URL pra onde o back tiver rodando
+// Certifique-se que está assim:
+export const API_URL = "http://localhost:5000"; // Note o 5000 (sem zero extra)
