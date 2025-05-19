@@ -1,12 +1,22 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { API_URL } from "../Services/Api";
+import Header from "./Header";
+import Categorias from "./Categoria"
+import FormularioProduto from "./FormularioProduto";
+import ProdutoItem from "./ProdutoItem";
+import ResumoEstoque from "./ResumoEstoque";
+import ListaProdutos from "./ListaProdutos";
+import axios from "axios";
+import ModalEditarProduto from "./components/ModalEditarProduto";
+
 
 function Stock() {
   const navigate = useNavigate();
 
   const [produtos, setProdutos] = useState([]);
   const [categorias, setCategorias] = useState([]);
+  console.log(categorias);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -80,6 +90,40 @@ function Stock() {
   const handleLogout = () => {
     localStorage.removeItem("token");
     navigate("/");
+  };
+
+  const handleExcluir = async (id) => {
+    const confirmar = window.confirm("Tem certeza que deseja excluir este produto?");
+    if (!confirmar) return;
+  
+    try {
+      await axios.delete(`http://localhost:5000/api/produtos/${id}`);
+  
+      // Atualiza a lista de produtos removendo o excluído
+      setProdutos(produtos.filter(produto => produto._id !== id));
+    } catch (error) {
+      console.error("Erro ao excluir produto:", error);
+      alert("Erro ao excluir o produto.");
+    }
+  };
+
+  const [produtoEditando, setProdutoEditando] = useState(null);
+  const [mostrarModalEditar, setMostrarModalEditar] = useState(false);
+
+  const handleEditar = (produto) => {
+    setProdutoEditando(produto);
+    setMostrarModalEditar(true);
+  };
+  
+  const handleSalvarEdicao = async (produtoAtualizado) => {
+    try {
+      await axios.put(`http://localhost:5000/api/produtos/${produtoAtualizado._id}`, produtoAtualizado);
+      fetchProdutos(); // atualiza lista
+      setMostrarModalEditar(false);
+      setProdutoEditando(null);
+    } catch (err) {
+      console.error("Erro ao salvar produto editado:", err);
+    }
   };
 
   const handleAdicionarCategoria = async () => {
@@ -163,66 +207,8 @@ function Stock() {
       console.error("Erro ao adicionar produto:", error);
       alert(`Erro ao adicionar produto: ${error.message}`);
     }
+    
   };
-
-  const handleImportCSV = async (e) => {
-    const token = localStorage.getItem("token");
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const formData = new FormData();
-    formData.append("file", file);
-
-    try {
-      const res = await fetch(`${API_URL}/importar/csv`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`
-        },
-        body: formData
-      });
-
-      if (!res.ok) {
-        throw new Error("Erro ao importar CSV");
-      }
-
-      alert("Importação CSV concluída");
-      window.location.reload(); // ou refaça a chamada da API aqui
-    } catch (error) {
-      console.error("Erro:", error);
-      alert("Erro ao importar CSV");
-    }
-  };
-
-  const handleImportExcel = async (e) => {
-    const token = localStorage.getItem("token");
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const formData = new FormData();
-    formData.append("file", file);
-
-    try {
-      const res = await fetch(`${API_URL}/importar/excel`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`
-        },
-        body: formData
-      });
-
-      if (!res.ok) {
-        throw new Error("Erro ao importar Excel");
-      }
-
-      alert("Importação Excel concluída");
-      window.location.reload();
-    } catch (error) {
-      console.error("Erro:", error);
-      alert("Erro ao importar Excel");
-    }
-  };
-
   const produtosFiltrados = produtos.filter((p) =>
     p.nome.toLowerCase().includes(busca.toLowerCase())
   );
@@ -235,192 +221,41 @@ function Stock() {
   return (
     <div className="min-h-screen bg-blue-100 flex justify-center py-10">
       <div className="bg-white p-6 rounded-xl shadow-lg w-[90%] max-w-6xl">
-          {/* Topo */}
-          <div className="flex justify-between items-center mb-6">
-            <h1 className="text-xl font-bold">Gestão de Estoque</h1>
-            <div className="flex gap-2">
-              {/* Exportar CSV */}
-              <button
-                onClick={() => window.open("http://localhost:5000/api/produtos/exportar/csv", "_blank")}
-                className="border px-4 py-1 rounded text-sm hover:bg-gray-100"
-              >
-                Exportar CSV
-              </button>
-
-              {/* Exportar Excel */}
-              <button
-                onClick={() => window.open("http://localhost:5000/api/produtos/exportar/excel", "_blank")}
-                className="border px-4 py-1 rounded text-sm hover:bg-gray-100"
-              >
-                Exportar Excel
-              </button>
-
-              {/* Importar CSV */}
-              <label className="border px-4 py-1 rounded text-sm hover:bg-gray-100 cursor-pointer">
-                Importar CSV
-                <input
-                  type="file"
-                  accept=".csv"
-                  hidden
-                  onChange={handleImportCSV}
-                />
-              </label>
-
-              {/* Importar Excel */}
-              <label className="border px-4 py-1 rounded text-sm hover:bg-gray-100 cursor-pointer">
-                Importar Excel
-                <input
-                  type="file"
-                  accept=".xlsx"
-                  hidden
-                  onChange={handleImportExcel}
-                />
-              </label>
-
-              {/* Botão Sair */}
-              <button
-                onClick={handleLogout}
-                className="border px-4 py-1 rounded text-sm hover:bg-gray-100"
-              >
-                Sair
-              </button>
-            </div>
-          </div>
-
+        <Header onLogout={handleLogout} />
         {loading && <p className="text-blue-600">Carregando...</p>}
         {error && <p className="text-red-600">{error}</p>}
-
-        {/* Cards */}
-        <div className="grid grid-cols-3 gap-4 mb-6">
-          <div className="bg-blue-600 text-white p-4 rounded-lg">
-            <p>Total de Produtos</p>
-            <h2 className="text-2xl font-bold">{produtos.length}</h2>
-          </div>
-          <div className="bg-orange-500 text-white p-4 rounded-lg">
-            <p>Estoque Baixo</p>
-            <h2 className="text-2xl font-bold">{produtos.filter(p => p.quantidade <= 5).length}</h2>
-          </div>
-          <div className="bg-green-600 text-white p-4 rounded-lg">
-            <p>Unidades de Estoque</p>
-            <h2 className="text-2xl font-bold">{produtos.reduce((acc, p) => acc + p.quantidade, 0)}</h2>
-          </div>
-        </div>
-
-        {/* Adicionar Categoria */}
-        <div className="flex justify-between items-start gap-6 mb-6 flex-wrap">
-          <div className="flex-1">
-            <p className="mb-2 font-medium">Adicionar Categoria</p>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                placeholder="Nome da categoria"
-                value={novaCategoria}
-                onChange={(e) => setNovaCategoria(e.target.value)}
-                className="border p-2 rounded w-full"
-              />
-              <button
-                onClick={handleAdicionarCategoria}
-                className="bg-purple-700 text-white px-4 rounded w-[40%]"
-              >
-                Nova Categoria
-              </button>
-            </div>
-          </div>
-          <div className="flex-1">
-            <p className="mb-2 font-medium">Categorias Existentes</p>
-            <div className="flex flex-wrap gap-2">
-              {categorias.map((cat) => (
-                <span key={cat._id} className="bg-gray-100 px-4 py-3 rounded text-sm">
-                  {cat.nome}
-                </span>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Adicionar Produto */}
-        <div className="mb-4">
-          <p className="mb-2 font-medium">Adicionar Produtos</p>
-          <div className="flex gap-2 flex-wrap mb-4">
-            <input
-              type="text"
-              placeholder="Nome do produto"
-              value={nomeProduto}
-              onChange={(e) => setNomeProduto(e.target.value)}
-              className="border p-2 rounded flex-1"
-            />
-            <input
-              type="number"
-              placeholder="Quantidade"
-              value={quantidade}
-              onChange={(e) => setQuantidade(e.target.value)}
-              className="border p-2 rounded flex-1"
-              min="0"
-            />
-            <input
-              type="number"
-              placeholder="Preço"
-              value={preco}
-              onChange={(e) => setPreco(e.target.value)}
-              className="border p-2 rounded flex-1"
-              min="0"
-              step="0.01"
-            />
-            <select
-              value={categoria}
-              onChange={(e) => setCategoria(e.target.value)}
-              className="border p-2 rounded flex-1"
-              required
-            >
-              <option value="">Selecione uma categoria</option>
-              {categorias.map((cat) => (
-                <option key={cat._id} value={cat._id}>{cat.nome}</option>
-              ))}
-            </select>
-            <button
-              onClick={handleAdicionarProduto}
-              className="bg-purple-700 text-white px-4 rounded"
-            >
-              + Adicionar Produto
-            </button>
-          </div>
-
-          {/* Buscar Produto */}
-          <div className="flex justify-between items-center mb-4">
-            <input
-              type="text"
-              placeholder="🔍 Buscar produtos..."
-              value={busca}
-              onChange={(e) => setBusca(e.target.value)}
-              className="border p-2 rounded flex-1"
-            />
-          </div>
-        </div>
-
-        {/* Lista de Produtos */}
-        <div className="space-y-4">
-          {produtosFiltrados.length > 0 ? (
-            produtosFiltrados.map((item) => (
-              <div key={item._id} className="bg-gray-50 p-4 rounded shadow-sm flex justify-between items-start">
-                <div>
-                  <p className="font-bold">{item.nome}</p>
-                  <p className="text-sm text-gray-600">
-                    Quantidade: {item.quantidade} | 
-                    Preço: R$ {item.preco?.toFixed(2) || '0.00'} | 
-                    Categoria: {getNomeCategoria(item.categoria)}
-                  </p>
-                </div>
-              </div>
-            ))
-          ) : (
-            <p className="text-gray-500 text-center py-4">
-              {busca ? "Nenhum produto encontrado" : "Nenhum produto cadastrado"}
-            </p>
-          )}
-        </div>
+        <ResumoEstoque produtos={produtos} />
+        <Categorias
+          categorias={categorias}
+          novaCategoria={novaCategoria}
+          setNovaCategoria={setNovaCategoria}
+          handleAdicionarCategoria={handleAdicionarCategoria}
+        />
+        <FormularioProduto
+          nomeProduto={nomeProduto}
+          setNomeProduto={setNomeProduto}
+          quantidade={quantidade}
+          setQuantidade={setQuantidade}
+          preco={preco}
+          setPreco={setPreco}
+          categoria={categoria}
+          setCategoria={setCategoria}
+          categorias={categorias}
+          handleAdicionarProduto={handleAdicionarProduto}
+          busca={busca}
+          setBusca={setBusca}
+        />
+        <ListaProdutos
+          produtos={produtosFiltrados}
+          handleEditar={handleEditar}
+          handleExcluir={handleExcluir}
+          getNomeCategoria={getNomeCategoria}
+          busca={busca}
+        />
       </div>
     </div>
   );
+  
 }
 
 export default Stock;

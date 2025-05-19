@@ -10,6 +10,7 @@ function Auth() {
     confirmaSenha: "",
   });
   const [erro, setErro] = useState("");
+  const successMsg = "Cadastro Realizado com sucesso!";
   const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
@@ -84,7 +85,7 @@ function Auth() {
           confirmaSenha: "",
         });
         setIsLogin(true);
-        setErro("Cadastro realizado! Faça login para continuar.");
+        setErro(successMsg);
       }
     } catch (error) {
       console.error("Erro completo:", error);
@@ -106,7 +107,9 @@ function Auth() {
         </h2>
 
         {erro && (
-          <div className="mb-4 p-3 bg-red-100 text-red-700 text-sm rounded-md">
+          erro===successMsg ? <div className="mb-4 p-3 bg-green-100 text-green-700 text-sm rounded-md">
+          {erro}
+          </div>: <div className="mb-4 p-3 bg-red-100 text-red-700 text-sm rounded-md">
             {erro}
           </div>
         )}

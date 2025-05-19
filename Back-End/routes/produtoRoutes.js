@@ -5,10 +5,10 @@ const Categoria = require("../models/Categoria");
 const fs = require("fs");
 const path = require("path");
 const csv = require("csv-parser");
-const { Parser } = require("json2csv");
 const multer = require("multer");
 const xlsx = require("xlsx");
 const os = require("os");
+const { Parser } = require('json2csv');
 
 // Configuração do multer para upload de arquivos
 const upload = multer({
@@ -93,121 +93,96 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
-// Exportar para CSV
-const downloadDirectory = path.join(os.homedir(), "Downloads"); // Usa o diretório do usuário no sistema
-
-router.get("/exportar/csv", async (req, res) => {
-  try {
-    const produtos = await Produto.find().populate("categoria");
-
-    // Formatando os dados
-    const produtosFormatados = produtos.map((produto) => ({
-      nome: produto.nome,
-      quantidade: produto.quantidade,
-      preco: produto.preco,
-      categoria: produto.categoria ? produto.categoria.nome : "Sem Categoria", // Exemplo de exportação do nome da categoria
-    }));
-
-    // Convertendo os produtos para formato CSV
-    const produtosCSV = new Parser().parse(produtosFormatados);
-
-    // Salvando o arquivo CSV no diretório de downloads do usuário
-    const filePath = path.join(downloadDirectory, "produtos.csv");
-    fs.writeFileSync(filePath, produtosCSV);
-
-    // Enviando o arquivo para download
-    res.download(filePath, "produtos.csv", (err) => {
-      if (err) {
-        console.log("Erro ao enviar arquivo:", err);
-        res.status(500).send("Erro ao enviar o arquivo");
-      }
-    });
-  } catch (err) {
-    res.status(500).json({ erro: err.message });
-  }
-});
-
-// Importar CSV
-router.post("/importar/csv", upload.single("file"), (req, res) => {
-  const filePath = path.join(__dirname, "..", req.file.path);
-
-  const produtos = [];
-  fs.createReadStream(filePath)
-    .pipe(csv())
-    .on("data", (row) => {
-      // Verificar se a categoria existe antes de adicionar
-      if (row.categoriaId) {
-        produtos.push({
-          nome: row.nome,
-          quantidade: parseInt(row.quantidade),
-          preco: parseFloat(row.preco),
-          categoria: row.categoriaId, // Categoria é o ID
-        });
-      }
-    })
-    .on("end", async () => {
-      try {
-        // Salvar os produtos no banco
-        await Produto.insertMany(produtos);
-        res.status(200).json({ msg: "Produtos importados com sucesso!" });
-      } catch (err) {
-        res
-          .status(500)
-          .json({ erro: "Erro ao importar produtos: " + err.message });
-      }
-    })
-    .on("error", (err) => {
-      res
-        .status(500)
-        .json({ erro: "Erro ao ler o arquivo CSV: " + err.message });
-    });
-});
-
 // Exportar para Excel
+const XLSX = require('xlsx');
+
 router.get("/exportar/excel", async (req, res) => {
   try {
     const produtos = await Produto.find().populate("categoria");
 
-    // Convertendo os produtos para um formato adequado para o Excel
-    const ws = xlsx.utils.json_to_sheet(produtos);
-    const wb = xlsx.utils.book_new();
-    xlsx.utils.book_append_sheet(wb, ws, "Produtos");
-
-    // Criando o arquivo Excel
-    const filePath = path.join(__dirname, "..", "public", "produtos.xlsx");
-    xlsx.writeFile(wb, filePath);
-
-    // Enviando o arquivo para download
-    res.download(filePath, "produtos.xlsx", (err) => {
-      if (err) {
-        console.log("Erro ao enviar arquivo:", err);
-        res.status(500).send("Erro ao enviar o arquivo");
+    // Formatando os dados para o Excel
+    const dadosFormatados = produtos.map(produto => ({
+      'Nome do Produto': produto.nome,
+      'Quantidade em Estoque': produto.quantidade,
+      'Preço Unitário': produto.preco,
+      'Categoria': produto.categoria ? produto.categoria.nome : "Sem Categoria",
+      'Valor Total em Estoque': { 
+        f: `C${produtos.indexOf(produto) + 2}*B${produtos.indexOf(produto) + 2}`,
+        t: 'n',
+        z: '"R$"#,##0.00'
       }
+    }));
+
+    // Criar a planilha
+    const ws = XLSX.utils.json_to_sheet(dadosFormatados);
+    
+    // Adicionar fórmulas e formatação
+    dadosFormatados.forEach((_, index) => {
+      const linha = index + 2; // +2 porque a linha 1 é o cabeçalho
+      ws[`E${linha}`] = { 
+        f: `C${linha}*B${linha}`,
+        t: 'n',
+        z: '"R$"#,##0.00'
+      };
     });
+
+    // Definir largura das colunas
+    ws['!cols'] = [
+      { wch: 30 }, // Nome do Produto
+      { wch: 20 }, // Quantidade
+      { wch: 15 }, // Preço
+      { wch: 25 }, // Categoria
+      { wch: 20 }  // Valor Total
+    ];
+
+    // Adicionar estilo ao cabeçalho
+    const headerStyle = {
+      font: { bold: true, color: { rgb: "FFFFFF" } },
+      fill: { fgColor: { rgb: "4472C4" } }, // Azul
+      alignment: { horizontal: "center" }
+    };
+
+    // Aplicar estilo ao cabeçalho
+    for (let col = 0; col < 5; col++) {
+      const cellRef = XLSX.utils.encode_cell({ r: 0, c: col });
+      if (!ws[cellRef]) continue;
+      ws[cellRef].s = headerStyle;
+    }
+
+    // Formatar colunas numéricas
+    const moneyFormat = '"R$"#,##0.00';
+    for (let i = 0; i < produtos.length; i++) {
+      const linha = i + 2;
+      ['C', 'E'].forEach(col => {
+        const cellRef = `${col}${linha}`;
+        if (ws[cellRef]) {
+          ws[cellRef].z = moneyFormat;
+        }
+      });
+    }
+
+    // Criar o workbook e adicionar a planilha
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Produtos");
+
+    // Gerar buffer do arquivo
+    const excelBuffer = XLSX.write(wb, { 
+      bookType: 'xlsx', 
+      type: 'buffer',
+      bookSST: true 
+    });
+
+    // Configurar headers para download
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', 'attachment; filename="Estoque.xlsx"');
+    
+    // Enviar o arquivo
+    res.send(excelBuffer);
+
   } catch (err) {
+    console.error("Erro na exportação para Excel:", err);
     res.status(500).json({ erro: err.message });
   }
-});
-
-// Importar Excel
-router.post("/importar/excel", upload.single("file"), (req, res) => {
-  const filePath = path.join(__dirname, "..", req.file.path);
-  const wb = xlsx.readFile(filePath);
-  const ws = wb.Sheets[wb.SheetNames[0]];
-  const data = xlsx.utils.sheet_to_json(ws);
-
-  const produtos = data.map((row) => ({
-    nome: row.nome,
-    quantidade: parseInt(row.quantidade),
-    preco: parseFloat(row.preco),
-    categoria: row.categoriaId,
-  }));
-
-  Produto.insertMany(produtos)
-    .then(() =>
-      res.status(200).json({ msg: "Produtos importados com sucesso!" })
-    )
-    .catch((err) => res.status(500).json({ erro: err.message }));
 });
 
 module.exports = router;
