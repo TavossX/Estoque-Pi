@@ -2,21 +2,19 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { API_URL } from "../Services/Api";
 import Header from "./Header";
-import Categorias from "./Categoria"
+import Categorias from "./Categoria";
 import FormularioProduto from "./FormularioProduto";
 import ProdutoItem from "./ProdutoItem";
 import ResumoEstoque from "./ResumoEstoque";
 import ListaProdutos from "./ListaProdutos";
 import axios from "axios";
-import ModalEditarProduto from "./components/ModalEditarProduto";
-
+import ModalEditarProduto from "./ModalEditarProduto";
 
 function Stock() {
   const navigate = useNavigate();
 
   const [produtos, setProdutos] = useState([]);
   const [categorias, setCategorias] = useState([]);
-  console.log(categorias);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -40,16 +38,16 @@ function Stock() {
       try {
         const [resProdutos, resCategorias] = await Promise.all([
           fetch(`${API_URL}/api/produtos`, {
-            headers: { 
-              "Authorization": `Bearer ${token}`,
-              "Content-Type": "application/json"
-            }
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
           }),
           fetch(`${API_URL}/api/categorias`, {
-            headers: { 
-              "Authorization": `Bearer ${token}`,
-              "Content-Type": "application/json"
-            }
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
           }),
         ]);
 
@@ -62,8 +60,10 @@ function Stock() {
         const contentTypeProdutos = resProdutos.headers.get("content-type");
         const contentTypeCategorias = resCategorias.headers.get("content-type");
 
-        if (!contentTypeProdutos?.includes("application/json") || 
-            !contentTypeCategorias?.includes("application/json")) {
+        if (
+          !contentTypeProdutos?.includes("application/json") ||
+          !contentTypeCategorias?.includes("application/json")
+        ) {
           throw new Error("Resposta não é JSON");
         }
 
@@ -93,14 +93,16 @@ function Stock() {
   };
 
   const handleExcluir = async (id) => {
-    const confirmar = window.confirm("Tem certeza que deseja excluir este produto?");
+    const confirmar = window.confirm(
+      "Tem certeza que deseja excluir este produto?"
+    );
     if (!confirmar) return;
-  
+
     try {
       await axios.delete(`http://localhost:5000/api/produtos/${id}`);
-  
+
       // Atualiza a lista de produtos removendo o excluído
-      setProdutos(produtos.filter(produto => produto._id !== id));
+      setProdutos(produtos.filter((produto) => produto._id !== id));
     } catch (error) {
       console.error("Erro ao excluir produto:", error);
       alert("Erro ao excluir o produto.");
@@ -114,10 +116,30 @@ function Stock() {
     setProdutoEditando(produto);
     setMostrarModalEditar(true);
   };
-  
+
+  const fetchProdutos = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`${API_URL}/api/produtos`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+      if (!res.ok) throw new Error("Erro ao buscar produtos");
+      const produtosData = await res.json();
+      setProdutos(produtosData);
+    } catch (err) {
+      console.error("Erro ao atualizar lista de produtos:", err);
+    }
+  };
+
   const handleSalvarEdicao = async (produtoAtualizado) => {
     try {
-      await axios.put(`http://localhost:5000/api/produtos/${produtoAtualizado._id}`, produtoAtualizado);
+      await axios.put(
+        `http://localhost:5000/api/produtos/${produtoAtualizado._id}`,
+        produtoAtualizado
+      );
       fetchProdutos(); // atualiza lista
       setMostrarModalEditar(false);
       setProdutoEditando(null);
@@ -138,7 +160,7 @@ function Stock() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ nome: novaCategoria.trim() }),
       });
@@ -149,12 +171,12 @@ function Stock() {
       }
 
       const categoriaCriada = await res.json();
-      
+
       if (!categoriaCriada?.nome) {
         throw new Error("Resposta da API inválida");
       }
 
-      setCategorias(prev => [...prev, categoriaCriada]);
+      setCategorias((prev) => [...prev, categoriaCriada]);
       setNovaCategoria("");
     } catch (error) {
       console.error("Erro ao adicionar categoria:", error);
@@ -164,7 +186,7 @@ function Stock() {
 
   const handleAdicionarProduto = async () => {
     const token = localStorage.getItem("token");
-    
+
     if (!nomeProduto.trim() || !quantidade || !preco || !categoria) {
       alert("Por favor, preencha todos os campos");
       return;
@@ -182,7 +204,7 @@ function Stock() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(novoProduto),
       });
@@ -193,12 +215,12 @@ function Stock() {
       }
 
       const produtoCriado = await res.json();
-      
+
       if (!produtoCriado?.nome) {
         throw new Error("Resposta da API inválida");
       }
 
-      setProdutos(prev => [...prev, produtoCriado]);
+      setProdutos((prev) => [...prev, produtoCriado]);
       setNomeProduto("");
       setQuantidade("");
       setPreco("");
@@ -207,14 +229,15 @@ function Stock() {
       console.error("Erro ao adicionar produto:", error);
       alert(`Erro ao adicionar produto: ${error.message}`);
     }
-    
   };
   const produtosFiltrados = produtos.filter((p) =>
     p.nome.toLowerCase().includes(busca.toLowerCase())
   );
 
   const getNomeCategoria = (categoriaId) => {
-    const categoriaEncontrada = categorias.find(cat => cat._id === categoriaId);
+    const categoriaEncontrada = categorias.find(
+      (cat) => cat._id === categoriaId
+    );
     return categoriaEncontrada ? categoriaEncontrada.nome : "Desconhecida";
   };
 
@@ -252,10 +275,17 @@ function Stock() {
           getNomeCategoria={getNomeCategoria}
           busca={busca}
         />
+        {mostrarModalEditar && (
+          <ModalEditarProduto
+            produto={produtoEditando}
+            categorias={categorias}
+            onClose={() => setMostrarModalEditar(false)}
+            onSalvar={handleSalvarEdicao}
+          />
+        )}
       </div>
     </div>
   );
-  
 }
 
 export default Stock;

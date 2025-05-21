@@ -1,6 +1,12 @@
 import ProdutoItem from "./ProdutoItem";
 
-export default function ListaProdutos({ produtos, handleEditar, handleExcluir, getNomeCategoria, busca }) {
+export default function ListaProdutos({
+  produtos,
+  handleEditar,
+  handleExcluir,
+  getNomeCategoria,
+  busca,
+}) {
   return (
     <div className="space-y-4">
       {produtos.length > 0 ? (
