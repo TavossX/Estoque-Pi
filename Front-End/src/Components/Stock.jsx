@@ -4,9 +4,8 @@ import { API_URL } from "../Services/Api";
 import Header from "./Header";
 import Categorias from "./Categoria";
 import FormularioProduto from "./FormularioProduto";
-import ProdutoItem from "./ProdutoItem";
 import ResumoEstoque from "./ResumoEstoque";
-import ListaProdutos from "./ListaProdutos";
+import ListaProdutos from "../../../front-end/src/Components/ListaProdutos";
 import axios from "axios";
 import ModalEditarProduto from "./ModalEditarProduto";
 
@@ -242,8 +241,8 @@ function Stock() {
   };
 
   return (
-    <div className="min-h-screen bg-blue-100 flex justify-center py-10">
-      <div className="bg-white p-6 rounded-xl shadow-lg w-[90%] max-w-6xl">
+    <div className="min-h-screen bg-blue-100 flex justify-center py-10 dark:bg-gray-800">
+      <div className="bg-white p-6 rounded-xl shadow-lg w-[90%] max-w-6xl dark:bg-black">
         <Header onLogout={handleLogout} />
         {loading && <p className="text-blue-600">Carregando...</p>}
         {error && <p className="text-red-600">{error}</p>}

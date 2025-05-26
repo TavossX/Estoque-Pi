@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Stock from "./Components/Stock";
 import Auth from "./Pages/Auth.jsx";
+import "boxicons/css/boxicons.min.css";
 
 function App() {
   return (

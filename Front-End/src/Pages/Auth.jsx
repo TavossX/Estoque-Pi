@@ -68,10 +68,6 @@ function Auth() {
 
       const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error(data.message || "Erro no servidor");
-      }
-
       console.log(`${isLogin ? "Login" : "Cadastro"} bem-sucedido!`, data);
 
       if (isLogin) {
@@ -106,13 +102,16 @@ function Auth() {
           {isLogin ? "Login" : "Cadastro"}
         </h2>
 
-        {erro && (
-          erro===successMsg ? <div className="mb-4 p-3 bg-green-100 text-green-700 text-sm rounded-md">
-          {erro}
-          </div>: <div className="mb-4 p-3 bg-red-100 text-red-700 text-sm rounded-md">
-            {erro}
-          </div>
-        )}
+        {erro &&
+          (erro === successMsg ? (
+            <div className="mb-4 p-3 bg-green-100 text-green-700 text-sm rounded-md">
+              {erro}
+            </div>
+          ) : (
+            <div className="mb-4 p-3 bg-red-100 text-red-700 text-sm rounded-md">
+              {erro}
+            </div>
+          ))}
 
         <div className="mb-4">
           <label htmlFor="email" className="block text-gray-700 mb-2">
