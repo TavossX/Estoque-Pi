@@ -17,7 +17,7 @@ services:
     depends_on:
       - mongo
     environment:
-      - MONGO_URI=mongodb://mongo:27017/api/Estoque
+      - MONGO_URI=mongodb://mongo:27017/Estoque
     volumes:
       - ./backend:/app
     restart: always
