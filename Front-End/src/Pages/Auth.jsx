@@ -92,29 +92,32 @@ function Auth() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
       <form
         onSubmit={handleSubmit}
-        className="bg-white p-8 rounded shadow-md w-full max-w-md"
+        className="bg-white dark:bg-gray-800 p-8 rounded shadow-md w-full max-w-md"
         noValidate
       >
-        <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">
+        <h2 className="text-2xl font-bold mb-6 text-center text-gray-800 dark:text-white">
           {isLogin ? "Login" : "Cadastro"}
         </h2>
 
         {erro &&
           (erro === successMsg ? (
-            <div className="mb-4 p-3 bg-green-100 text-green-700 text-sm rounded-md">
+            <div className="mb-4 p-3 bg-green-100 dark:bg-green-800 text-green-700 dark:text-green-200 text-sm rounded-md">
               {erro}
             </div>
           ) : (
-            <div className="mb-4 p-3 bg-red-100 text-red-700 text-sm rounded-md">
+            <div className="mb-4 p-3 bg-red-100 dark:bg-red-800 text-red-700 dark:text-red-200 text-sm rounded-md">
               {erro}
             </div>
           ))}
 
         <div className="mb-4">
-          <label htmlFor="email" className="block text-gray-700 mb-2">
+          <label
+            htmlFor="email"
+            className="block text-gray-700 dark:text-gray-200 mb-2"
+          >
             E-mail
           </label>
           <input
@@ -124,14 +127,17 @@ function Auth() {
             placeholder="seu@email.com"
             value={formData.email}
             onChange={handleChange}
-            className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
             autoComplete="email"
           />
         </div>
 
         <div className="mb-4">
-          <label htmlFor="senha" className="block text-gray-700 mb-2">
+          <label
+            htmlFor="senha"
+            className="block text-gray-700 dark:text-gray-200 mb-2"
+          >
             Senha
           </label>
           <input
@@ -141,7 +147,7 @@ function Auth() {
             placeholder="Sua senha"
             value={formData.senha}
             onChange={handleChange}
-            className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
             minLength={6}
             autoComplete={isLogin ? "current-password" : "new-password"}
@@ -150,7 +156,10 @@ function Auth() {
 
         {!isLogin && (
           <div className="mb-6">
-            <label htmlFor="confirmaSenha" className="block text-gray-700 mb-2">
+            <label
+              htmlFor="confirmaSenha"
+              className="block text-gray-700 dark:text-gray-200 mb-2"
+            >
               Confirme a Senha
             </label>
             <input
@@ -160,7 +169,7 @@ function Auth() {
               placeholder="Confirme sua senha"
               value={formData.confirmaSenha}
               onChange={handleChange}
-              className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
               minLength={6}
               autoComplete="new-password"
@@ -208,7 +217,7 @@ function Auth() {
           )}
         </button>
 
-        <p className="mt-4 text-center text-gray-600">
+        <p className="mt-4 text-center text-gray-600 dark:text-gray-300">
           {isLogin ? "Não tem uma conta?" : "Já tem uma conta?"}{" "}
           <button
             type="button"

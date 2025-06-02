@@ -9,11 +9,12 @@ export default function Header({ onLogout }) {
         <DownloadButton />
         <button
           onClick={onLogout}
-          className="border px-4 py-1 items-center rounded text-sm hover:bg-gray-200 dark:hover:bg-gray-700 dark:border-gray-600 dark:text-white flex"
+          className="flex items-center justify-between gap-2 px-4 py-2 rounded-md text-sm font-semibold transition-all duration-200 text-black dark:text-white bg-white dark:bg-black border border-transparent dark:border-white/30 hover:border-white/60 hover:bg-gradient-to-b hover:from-white/20 hover:via-white/30 hover:to-white/40 dark:hover:from-white/10 dark:hover:via-white/20 dark:hover:to-white/30 hover:shadow-md active:translate-y-0.5"
         >
-          <i className="bx bx-exit text-xl"></i>
+          <i className="bx bx-exit text-lg"></i>
           Sair
         </button>
+
         <ThemeChange />
       </div>
     </div>

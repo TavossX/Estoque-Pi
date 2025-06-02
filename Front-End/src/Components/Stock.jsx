@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { API_URL } from "../Services/Api";
+import { Outlet } from "react-router-dom";
 import Header from "./Header";
 import Categorias from "./Categoria";
 import FormularioProduto from "./FormularioProduto";
 import ResumoEstoque from "./ResumoEstoque";
-import ListaProdutos from "../../../front-end/src/Components/ListaProdutos";
+import ListaProdutos from "./ListaProdutos";
 import axios from "axios";
 import ModalEditarProduto from "./ModalEditarProduto";
 
@@ -253,6 +254,7 @@ function Stock() {
           setNovaCategoria={setNovaCategoria}
           handleAdicionarCategoria={handleAdicionarCategoria}
         />
+
         <FormularioProduto
           nomeProduto={nomeProduto}
           setNomeProduto={setNomeProduto}

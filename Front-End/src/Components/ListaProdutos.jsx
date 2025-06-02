@@ -8,7 +8,7 @@ export default function ListaProdutos({
   busca,
 }) {
   return (
-    <div className="space-y-4">
+    <div className="max-h-[400px] overflow-y-auto space-y-4">
       {produtos.length > 0 ? (
         produtos.map((item) => (
           <ProdutoItem

@@ -1,10 +1,21 @@
 import { useState, useEffect } from "react";
 
 export default function ThemeChange() {
-  const [isDark, setIsDark] = useState(false);
+  const [isDark, setIsDark] = useState(() => {
+    if (typeof window !== "undefined") {
+      const savedTheme = localStorage.getItem("theme");
+      return (
+        savedTheme === "dark" ||
+        (!savedTheme &&
+          window.matchMedia("(prefers-color-scheme: dark)").matches)
+      );
+    }
+    return false;
+  });
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", isDark);
+    localStorage.setItem("theme", isDark ? "dark" : "light");
   }, [isDark]);
 
   const toggleTheme = () => setIsDark(!isDark);
@@ -59,7 +70,7 @@ export default function ThemeChange() {
               }`}
               cx={[18, 14, 6, 2, 6, 14][i]}
               cy={[10, 16.928, 16.928, 10, 3.1718, 3.1718][i]}
-              r="1.2" // menor raio
+              r="1.2"
               style={{ animationDelay: `${i * 0.05}s` }}
             />
           ))}
