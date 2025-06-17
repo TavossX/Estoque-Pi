@@ -21,6 +21,8 @@ function Stock() {
   const [nomeProduto, setNomeProduto] = useState("");
   const [quantidade, setQuantidade] = useState("");
   const [preco, setPreco] = useState("");
+  const [corredor, setCorredor] = useState("");
+  const [prateleira, setPrateleira] = useState("");
   const [categoria, setCategoria] = useState("");
 
   const [novaCategoria, setNovaCategoria] = useState("");
@@ -196,6 +198,10 @@ function Stock() {
       nome: nomeProduto.trim(),
       quantidade: Number(quantidade),
       preco: Number(preco),
+      localizacao: {
+        corredor: corredor.trim(),
+        prateleira: prateleira.trim(),
+      },
       categoria,
     };
 
@@ -224,6 +230,8 @@ function Stock() {
       setNomeProduto("");
       setQuantidade("");
       setPreco("");
+      setCorredor("");
+      setPrateleira("");
       setCategoria("");
     } catch (error) {
       console.error("Erro ao adicionar produto:", error);
@@ -263,6 +271,10 @@ function Stock() {
           preco={preco}
           setPreco={setPreco}
           categoria={categoria}
+          corredor={corredor}
+          setCorredor={setCorredor}
+          prateleira={prateleira}
+          setPrateleira={setPrateleira}
           setCategoria={setCategoria}
           categorias={categorias}
           handleAdicionarProduto={handleAdicionarProduto}

@@ -8,7 +8,7 @@ const csv = require("csv-parser");
 const multer = require("multer");
 const xlsx = require("xlsx");
 const os = require("os");
-const { Parser } = require('json2csv');
+const { Parser } = require("json2csv");
 
 // Configuração do multer para upload de arquivos
 const upload = multer({
@@ -94,91 +94,79 @@ router.delete("/:id", async (req, res) => {
 });
 
 // Exportar para Excel
-const XLSX = require('xlsx');
+const XLSX = require("xlsx");
 
 router.get("/exportar/excel", async (req, res) => {
   try {
     const produtos = await Produto.find().populate("categoria");
 
     // Formatando os dados para o Excel
-    const dadosFormatados = produtos.map(produto => ({
-      'Nome do Produto': produto.nome,
-      'Quantidade em Estoque': produto.quantidade,
-      'Preço Unitário': produto.preco,
-      'Categoria': produto.categoria ? produto.categoria.nome : "Sem Categoria",
-      'Valor Total em Estoque': { 
-        f: `C${produtos.indexOf(produto) + 2}*B${produtos.indexOf(produto) + 2}`,
-        t: 'n',
-        z: '"R$"#,##0.00'
-      }
+    const dadosFormatados = produtos.map((produto, index) => ({
+      "Nome do Produto": produto.nome,
+      "Quantidade em Estoque": produto.quantidade,
+      "Preço Unitário": produto.preco,
+      Corredor: produto.localizacao?.corredor || "-", // Ajuste aqui
+      Prateleira: produto.localizacao?.prateleira || "-", // Ajuste aqui
+      Categoria: produto.categoria ? produto.categoria.nome : "Sem Categoria",
+      "Valor Total em Estoque": {
+        f: `C${index + 2}*B${index + 2}`,
+        t: "n",
+        z: '"R$"#,##0.00',
+      },
     }));
 
-    // Criar a planilha
     const ws = XLSX.utils.json_to_sheet(dadosFormatados);
-    
-    // Adicionar fórmulas e formatação
-    dadosFormatados.forEach((_, index) => {
-      const linha = index + 2; // +2 porque a linha 1 é o cabeçalho
-      ws[`E${linha}`] = { 
-        f: `C${linha}*B${linha}`,
-        t: 'n',
-        z: '"R$"#,##0.00'
-      };
-    });
 
     // Definir largura das colunas
-    ws['!cols'] = [
+    ws["!cols"] = [
       { wch: 30 }, // Nome do Produto
       { wch: 20 }, // Quantidade
       { wch: 15 }, // Preço
+      { wch: 15 }, // Corredor
+      { wch: 15 }, // Prateleira
       { wch: 25 }, // Categoria
-      { wch: 20 }  // Valor Total
+      { wch: 25 }, // Valor Total
     ];
 
-    // Adicionar estilo ao cabeçalho
+    // Estilo do cabeçalho
     const headerStyle = {
       font: { bold: true, color: { rgb: "FFFFFF" } },
-      fill: { fgColor: { rgb: "4472C4" } }, // Azul
-      alignment: { horizontal: "center" }
+      fill: { fgColor: { rgb: "4472C4" } },
+      alignment: { horizontal: "center" },
     };
 
     // Aplicar estilo ao cabeçalho
-    for (let col = 0; col < 5; col++) {
+    const numColunas = Object.keys(dadosFormatados[0]).length;
+    for (let col = 0; col < numColunas; col++) {
       const cellRef = XLSX.utils.encode_cell({ r: 0, c: col });
-      if (!ws[cellRef]) continue;
-      ws[cellRef].s = headerStyle;
+      if (ws[cellRef]) ws[cellRef].s = headerStyle;
     }
 
     // Formatar colunas numéricas
     const moneyFormat = '"R$"#,##0.00';
     for (let i = 0; i < produtos.length; i++) {
       const linha = i + 2;
-      ['C', 'E'].forEach(col => {
+      ["C", "G"].forEach((col) => {
         const cellRef = `${col}${linha}`;
-        if (ws[cellRef]) {
-          ws[cellRef].z = moneyFormat;
-        }
+        if (ws[cellRef]) ws[cellRef].z = moneyFormat;
       });
     }
 
-    // Criar o workbook e adicionar a planilha
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Produtos");
 
-    // Gerar buffer do arquivo
-    const excelBuffer = XLSX.write(wb, { 
-      bookType: 'xlsx', 
-      type: 'buffer',
-      bookSST: true 
+    const excelBuffer = XLSX.write(wb, {
+      bookType: "xlsx",
+      type: "buffer",
+      bookSST: true,
     });
 
-    // Configurar headers para download
-    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    res.setHeader('Content-Disposition', 'attachment; filename="Estoque.xlsx"');
-    
-    // Enviar o arquivo
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    );
+    res.setHeader("Content-Disposition", 'attachment; filename="Estoque.xlsx"');
     res.send(excelBuffer);
-
   } catch (err) {
     console.error("Erro na exportação para Excel:", err);
     res.status(500).json({ erro: err.message });

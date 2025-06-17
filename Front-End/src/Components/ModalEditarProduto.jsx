@@ -4,6 +4,8 @@ const ModalEditarProduto = ({ produto, categorias, onClose, onSalvar }) => {
   const [nome, setNome] = useState("");
   const [quantidade, setQuantidade] = useState(0);
   const [preco, setPreco] = useState(0);
+  const [corredor, setCorredor] = useState("");
+  const [prateleira, setPrateleira] = useState("");
   const [categoria, setCategoria] = useState("");
 
   useEffect(() => {
@@ -11,6 +13,8 @@ const ModalEditarProduto = ({ produto, categorias, onClose, onSalvar }) => {
       setNome(produto.nome);
       setQuantidade(produto.quantidade);
       setPreco(produto.preco);
+      setCorredor(produto.localizacao?.corredor || "");
+      setPrateleira(produto.localizacao?.prateleira || "");
       setCategoria(produto.categoria._id || produto.categoria);
     }
   }, [produto]);
@@ -22,6 +26,10 @@ const ModalEditarProduto = ({ produto, categorias, onClose, onSalvar }) => {
       nome,
       quantidade: Number(quantidade),
       preco: Number(preco),
+      localizacao: {
+        corredor,
+        prateleira,
+      },
       categoria,
     };
     onSalvar(atualizado);
@@ -55,6 +63,24 @@ const ModalEditarProduto = ({ produto, categorias, onClose, onSalvar }) => {
             placeholder="Preço"
             value={preco}
             onChange={(e) => setPreco(e.target.value)}
+            className="border p-2 w-full rounded dark:bg-gray-800 dark:border-gray-600 dark:text-white"
+            step="0.01"
+            required
+          />
+          <input
+            type="text"
+            placeholder="Corredor"
+            value={corredor}
+            onChange={(e) => setCorredor(e.target.value)}
+            className="border p-2 w-full rounded dark:bg-gray-800 dark:border-gray-600 dark:text-white"
+            step="0.01"
+            required
+          />
+          <input
+            type="text"
+            placeholder="Prateleira"
+            value={prateleira}
+            onChange={(e) => setPrateleira(e.target.value)}
             className="border p-2 w-full rounded dark:bg-gray-800 dark:border-gray-600 dark:text-white"
             step="0.01"
             required

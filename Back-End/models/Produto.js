@@ -10,6 +10,10 @@ const ProdutoSchema = new mongoose.Schema({
     required: true,
   },
   dataEntrada: { type: Date, default: Date.now },
+  localizacao: {
+    corredor: { type: String, required: true },
+    prateleira: { type: String, required: true },
+  },
 });
 
 module.exports = mongoose.model("Produto", ProdutoSchema);
