@@ -1,12 +1,16 @@
+import CategoriaItem from "./CategoriaItem"; // Importe corretamente
+
 export default function Categorias({
   categorias,
   novaCategoria,
   setNovaCategoria,
   handleAdicionarCategoria,
+  handleEditarCategoria,
+  handleExcluirCategoria,
 }) {
   return (
-    <div className="flex justify-between items-start gap-6 mb-6 flex-wrap">
-      <div className="flex-1">
+    <div className="flex flex-col gap-6 mb-6">
+      <div>
         <p className="mb-2 font-medium dark:text-white">Adicionar Categoria</p>
         <div className="flex gap-2">
           <input
@@ -18,24 +22,25 @@ export default function Categorias({
           />
           <button
             onClick={handleAdicionarCategoria}
-            className="bg-purple-700 text-white px-4 rounded w-[40%] hover:bg-purple-800"
+            className="bg-purple-700 text-white px-4 rounded hover:bg-purple-800"
           >
             Nova Categoria
           </button>
         </div>
       </div>
-      <div className="flex-1">
+
+      <div>
         <p className="mb-2 font-medium dark:text-white">
           Categorias Existentes
         </p>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-col gap-2">
           {categorias.map((cat) => (
-            <span
+            <CategoriaItem
               key={cat._id}
-              className="bg-gray-100 dark:bg-gray-700 px-4 py-3 rounded text-sm dark:text-white"
-            >
-              {cat.nome}
-            </span>
+              categoria={cat}
+              handleEditar={handleEditarCategoria}
+              handleExcluir={handleExcluirCategoria}
+            />
           ))}
         </div>
       </div>

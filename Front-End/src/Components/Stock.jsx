@@ -7,6 +7,8 @@ import Categorias from "./Categoria";
 import FormularioProduto from "./FormularioProduto";
 import ResumoEstoque from "./ResumoEstoque";
 import ListaProdutos from "./ListaProdutos";
+import DashBoard from "./Dashboard";
+import CategoriaItem from "./CategoriaItem";
 import axios from "axios";
 import ModalEditarProduto from "./ModalEditarProduto";
 
@@ -93,6 +95,8 @@ function Stock() {
     localStorage.removeItem("token");
     navigate("/");
   };
+
+  const [abaAtiva, setAbaAtiva] = useState("produtos");
 
   const handleExcluir = async (id) => {
     const confirmar = window.confirm(
@@ -250,44 +254,66 @@ function Stock() {
   };
 
   return (
-    <div className="min-h-screen bg-blue-100 flex justify-center py-10 dark:bg-gray-800">
-      <div className="bg-white p-6 rounded-xl shadow-lg w-[90%] max-w-6xl dark:bg-black">
-        <Header onLogout={handleLogout} />
+    <div className="min-h-screen bg-blue-100 flex dark:bg-gray-800">
+      {/* Dashboard lateral */}
+      <DashBoard
+        onLogout={handleLogout}
+        setAbaAtiva={setAbaAtiva}
+        abaAtiva={abaAtiva}
+      />
+
+      {/* Conteúdo principal */}
+      <div className="flex-1 bg-white p-6 rounded-xl shadow-lg my-10 mx-4 max-w-6xl w-full dark:bg-black">
+        <Header />
+
         {loading && <p className="text-blue-600">Carregando...</p>}
         {error && <p className="text-red-600">{error}</p>}
-        <ResumoEstoque produtos={produtos} />
-        <Categorias
-          categorias={categorias}
-          novaCategoria={novaCategoria}
-          setNovaCategoria={setNovaCategoria}
-          handleAdicionarCategoria={handleAdicionarCategoria}
-        />
 
-        <FormularioProduto
-          nomeProduto={nomeProduto}
-          setNomeProduto={setNomeProduto}
-          quantidade={quantidade}
-          setQuantidade={setQuantidade}
-          preco={preco}
-          setPreco={setPreco}
-          categoria={categoria}
-          corredor={corredor}
-          setCorredor={setCorredor}
-          prateleira={prateleira}
-          setPrateleira={setPrateleira}
-          setCategoria={setCategoria}
-          categorias={categorias}
-          handleAdicionarProduto={handleAdicionarProduto}
-          busca={busca}
-          setBusca={setBusca}
-        />
-        <ListaProdutos
-          produtos={produtosFiltrados}
-          handleEditar={handleEditar}
-          handleExcluir={handleExcluir}
-          getNomeCategoria={getNomeCategoria}
-          busca={busca}
-        />
+        <ResumoEstoque produtos={produtos} />
+
+        {/* Condicional: Aba de Produtos */}
+        {abaAtiva === "produtos" && (
+          <>
+            <FormularioProduto
+              nomeProduto={nomeProduto}
+              setNomeProduto={setNomeProduto}
+              quantidade={quantidade}
+              setQuantidade={setQuantidade}
+              preco={preco}
+              setPreco={setPreco}
+              categoria={categoria}
+              setCategoria={setCategoria}
+              categorias={categorias}
+              corredor={corredor}
+              setCorredor={setCorredor}
+              prateleira={prateleira}
+              setPrateleira={setPrateleira}
+              handleAdicionarProduto={handleAdicionarProduto}
+              busca={busca}
+              setBusca={setBusca}
+            />
+
+            <ListaProdutos
+              produtos={produtosFiltrados}
+              handleEditar={handleEditar}
+              handleExcluir={handleExcluir}
+              getNomeCategoria={getNomeCategoria}
+              busca={busca}
+            />
+          </>
+        )}
+
+        {/* Condicional: Aba de Categorias */}
+        {abaAtiva === "categorias" && (
+          <Categorias
+            categorias={categorias}
+            novaCategoria={novaCategoria}
+            setNovaCategoria={setNovaCategoria}
+            handleAdicionarCategoria={handleAdicionarCategoria}
+          />
+        )}
+
+        {/* Modal de Edição */}
         {mostrarModalEditar && (
           <ModalEditarProduto
             produto={produtoEditando}
