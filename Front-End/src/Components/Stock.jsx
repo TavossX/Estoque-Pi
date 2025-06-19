@@ -1,16 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { API_URL } from "../Services/Api";
-import { Outlet } from "react-router-dom";
 import Header from "./Header";
 import Categorias from "./Categoria";
 import FormularioProduto from "./FormularioProduto";
 import ResumoEstoque from "./ResumoEstoque";
 import ListaProdutos from "./ListaProdutos";
 import DashBoard from "./Dashboard";
-import CategoriaItem from "./CategoriaItem";
-import axios from "axios";
 import ModalEditarProduto from "./ModalEditarProduto";
+import axios from "axios";
+import CheckStockModal from "./CheckStockModal";
 
 function Stock() {
   const navigate = useNavigate();
@@ -29,6 +28,12 @@ function Stock() {
 
   const [novaCategoria, setNovaCategoria] = useState("");
   const [busca, setBusca] = useState("");
+
+  const [abaAtiva, setAbaAtiva] = useState("produtos");
+  const [mostrarCheckModal, setMostrarCheckModal] = useState(false);
+
+  const [produtoEditando, setProdutoEditando] = useState(null);
+  const [mostrarModalEditar, setMostrarModalEditar] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -91,13 +96,13 @@ function Stock() {
     fetchData();
   }, [navigate]);
 
+  // Logout
   const handleLogout = () => {
     localStorage.removeItem("token");
     navigate("/");
   };
 
-  const [abaAtiva, setAbaAtiva] = useState("produtos");
-
+  // Exclusão produto
   const handleExcluir = async (id) => {
     const confirmar = window.confirm(
       "Tem certeza que deseja excluir este produto?"
@@ -105,9 +110,7 @@ function Stock() {
     if (!confirmar) return;
 
     try {
-      await axios.delete(`http://localhost:5000/api/produtos/${id}`);
-
-      // Atualiza a lista de produtos removendo o excluído
+      await axios.delete(`${API_URL}/api/produtos/${id}`);
       setProdutos(produtos.filter((produto) => produto._id !== id));
     } catch (error) {
       console.error("Erro ao excluir produto:", error);
@@ -115,9 +118,7 @@ function Stock() {
     }
   };
 
-  const [produtoEditando, setProdutoEditando] = useState(null);
-  const [mostrarModalEditar, setMostrarModalEditar] = useState(false);
-
+  // Edição produto
   const handleEditar = (produto) => {
     setProdutoEditando(produto);
     setMostrarModalEditar(true);
@@ -140,13 +141,24 @@ function Stock() {
     }
   };
 
+  // Alterar estoque local e na API
+  const alterarEstoque = async (id, novaQtd) => {
+    try {
+      await axios.put(`${API_URL}/api/produtos/${id}`, { quantidade: novaQtd });
+      fetchProdutos();
+    } catch (error) {
+      console.error("Erro ao atualizar quantidade:", error);
+    }
+  };
+
+  // Salvar edição produto
   const handleSalvarEdicao = async (produtoAtualizado) => {
     try {
       await axios.put(
-        `http://localhost:5000/api/produtos/${produtoAtualizado._id}`,
+        `${API_URL}/api/produtos/${produtoAtualizado._id}`,
         produtoAtualizado
       );
-      fetchProdutos(); // atualiza lista
+      fetchProdutos();
       setMostrarModalEditar(false);
       setProdutoEditando(null);
     } catch (err) {
@@ -154,6 +166,7 @@ function Stock() {
     }
   };
 
+  // Adicionar categoria
   const handleAdicionarCategoria = async () => {
     const token = localStorage.getItem("token");
     if (!novaCategoria.trim()) {
@@ -190,6 +203,7 @@ function Stock() {
     }
   };
 
+  // Adicionar produto
   const handleAdicionarProduto = async () => {
     const token = localStorage.getItem("token");
 
@@ -242,10 +256,13 @@ function Stock() {
       alert(`Erro ao adicionar produto: ${error.message}`);
     }
   };
+
+  // Filtrar produtos pela busca
   const produtosFiltrados = produtos.filter((p) =>
     p.nome.toLowerCase().includes(busca.toLowerCase())
   );
 
+  // Busca nome da categoria pelo id
   const getNomeCategoria = (categoriaId) => {
     const categoriaEncontrada = categorias.find(
       (cat) => cat._id === categoriaId
@@ -253,75 +270,91 @@ function Stock() {
     return categoriaEncontrada ? categoriaEncontrada.nome : "Desconhecida";
   };
 
+  // Função para salvar os produtos alterados no modal CheckStockModal
+  const salvarProdutos = (produtosAtualizados) => {
+    setProdutos(produtosAtualizados);
+    setMostrarCheckModal(false);
+  };
+
   return (
-    <div className="min-h-screen bg-blue-100 flex dark:bg-gray-800">
-      {/* Dashboard lateral */}
-      <DashBoard
-        onLogout={handleLogout}
-        setAbaAtiva={setAbaAtiva}
-        abaAtiva={abaAtiva}
-      />
+    <div className="grid grid-cols-[0.2fr_1fr] grid-rows-3 bg-blue-100 dark:bg-gray-800">
+      <div className="row-start-2 ml-24">
+        <DashBoard
+          onLogout={handleLogout}
+          setAbaAtiva={setAbaAtiva}
+          abaAtiva={abaAtiva}
+        />
+      </div>
+      <div className="min-h-screen row-span-3 col-start-2 bg-blue-100 flex dark:bg-gray-800 ml-24">
+        <div className="flex-1 bg-white p-6 rounded-xl shadow-xl shadow-blue-400/50 my-10 shadow-sm mx-4 max-w-6xl w-full dark:bg-black">
+          <Header abrirCheckStock={() => setMostrarCheckModal(true)} />
 
-      {/* Conteúdo principal */}
-      <div className="flex-1 bg-white p-6 rounded-xl shadow-lg my-10 mx-4 max-w-6xl w-full dark:bg-black">
-        <Header />
+          {loading && <p className="text-blue-600">Carregando...</p>}
+          {error && <p className="text-red-600">{error}</p>}
 
-        {loading && <p className="text-blue-600">Carregando...</p>}
-        {error && <p className="text-red-600">{error}</p>}
+          <ResumoEstoque produtos={produtos} />
 
-        <ResumoEstoque produtos={produtos} />
+          {abaAtiva === "produtos" && (
+            <>
+              <FormularioProduto
+                nomeProduto={nomeProduto}
+                setNomeProduto={setNomeProduto}
+                quantidade={quantidade}
+                setQuantidade={setQuantidade}
+                preco={preco}
+                setPreco={setPreco}
+                categoria={categoria}
+                setCategoria={setCategoria}
+                categorias={categorias}
+                corredor={corredor}
+                setCorredor={setCorredor}
+                prateleira={prateleira}
+                setPrateleira={setPrateleira}
+                handleAdicionarProduto={handleAdicionarProduto}
+                busca={busca}
+                setBusca={setBusca}
+              />
 
-        {/* Condicional: Aba de Produtos */}
-        {abaAtiva === "produtos" && (
-          <>
-            <FormularioProduto
-              nomeProduto={nomeProduto}
-              setNomeProduto={setNomeProduto}
-              quantidade={quantidade}
-              setQuantidade={setQuantidade}
-              preco={preco}
-              setPreco={setPreco}
-              categoria={categoria}
-              setCategoria={setCategoria}
+              <ListaProdutos
+                produtos={produtosFiltrados}
+                handleEditar={handleEditar}
+                handleExcluir={handleExcluir}
+                getNomeCategoria={getNomeCategoria}
+                busca={busca}
+              />
+            </>
+          )}
+
+          {abaAtiva === "categorias" && (
+            <Categorias
               categorias={categorias}
-              corredor={corredor}
-              setCorredor={setCorredor}
-              prateleira={prateleira}
-              setPrateleira={setPrateleira}
-              handleAdicionarProduto={handleAdicionarProduto}
-              busca={busca}
-              setBusca={setBusca}
+              novaCategoria={novaCategoria}
+              setNovaCategoria={setNovaCategoria}
+              handleAdicionarCategoria={handleAdicionarCategoria}
             />
+          )}
 
-            <ListaProdutos
-              produtos={produtosFiltrados}
-              handleEditar={handleEditar}
-              handleExcluir={handleExcluir}
+          {mostrarModalEditar && (
+            <ModalEditarProduto
+              produto={produtoEditando}
+              categorias={categorias}
+              onClose={() => setMostrarModalEditar(false)}
+              onSalvar={handleSalvarEdicao}
+            />
+          )}
+
+          {mostrarCheckModal && (
+            <CheckStockModal
+              produtos={produtos}
+              onClose={() => setMostrarCheckModal(false)}
+              onSave={salvarProdutos} // <-- Passa a prop onSave
+              atualizarLista={fetchProdutos}
+              alterarEstoque={alterarEstoque}
+              deletarProduto={handleExcluir}
               getNomeCategoria={getNomeCategoria}
-              busca={busca}
             />
-          </>
-        )}
-
-        {/* Condicional: Aba de Categorias */}
-        {abaAtiva === "categorias" && (
-          <Categorias
-            categorias={categorias}
-            novaCategoria={novaCategoria}
-            setNovaCategoria={setNovaCategoria}
-            handleAdicionarCategoria={handleAdicionarCategoria}
-          />
-        )}
-
-        {/* Modal de Edição */}
-        {mostrarModalEditar && (
-          <ModalEditarProduto
-            produto={produtoEditando}
-            categorias={categorias}
-            onClose={() => setMostrarModalEditar(false)}
-            onSalvar={handleSalvarEdicao}
-          />
-        )}
+          )}
+        </div>
       </div>
     </div>
   );
