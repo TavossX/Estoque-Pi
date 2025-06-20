@@ -14,6 +14,11 @@ const ProdutoSchema = new mongoose.Schema({
     corredor: { type: String, required: true },
     prateleira: { type: String, required: true },
   },
+  usuarioId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Usuario",
+    required: true,
+  },
 });
 
 module.exports = mongoose.model("Produto", ProdutoSchema);

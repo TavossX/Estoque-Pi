@@ -2,13 +2,11 @@ const express = require("express");
 const router = express.Router();
 const Produto = require("../models/Produto");
 const Categoria = require("../models/Categoria");
-const fs = require("fs");
-const path = require("path");
-const csv = require("csv-parser");
 const multer = require("multer");
-const xlsx = require("xlsx");
-const os = require("os");
-const { Parser } = require("json2csv");
+const XLSX = require("xlsx");
+const { enviarEmailEstoqueBaixo } = require("../services/emailService");
+const Usuario = require("../models/User");
+const verifyToken = require("../middleware/auth"); // importe o middleware
 
 // Configuração do multer para upload de arquivos
 const upload = multer({
@@ -16,10 +14,11 @@ const upload = multer({
   limits: { fileSize: 10 * 1024 * 1024 }, // Limite de 10MB
 });
 
-// Criar produto
-router.post("/", async (req, res) => {
+// Criar produto — agora com autenticação e pegando usuarioId do token
+router.post("/", verifyToken, async (req, res) => {
   try {
     const { categoria } = req.body;
+    const usuarioId = req.usuarioId; // pega do middleware
 
     const categoriaExiste = await Categoria.findById(categoria);
     if (!categoriaExiste) {
@@ -28,7 +27,7 @@ router.post("/", async (req, res) => {
         .json({ erro: "Categoria inválida ou não encontrada." });
     }
 
-    const novoProduto = new Produto(req.body);
+    const novoProduto = new Produto({ ...req.body, usuarioId });
     const produtoSalvo = await novoProduto.save();
     res.status(201).json(produtoSalvo);
   } catch (err) {
@@ -43,6 +42,29 @@ router.get("/", async (req, res) => {
     res.json(produtos);
   } catch (err) {
     res.status(500).json({ erro: err.message });
+  }
+});
+
+// Verificar produtos com estoque baixo e enviar e-mails
+router.get("/verificar-estoque-baixo", async (req, res) => {
+  try {
+    const produtos = await Produto.find({ quantidade: { $lte: 5 } });
+
+    for (const produto of produtos) {
+      const usuario = await Usuario.findById(produto.usuarioId);
+      if (usuario && usuario.email) {
+        await enviarEmailEstoqueBaixo(
+          usuario.email,
+          produto.nome,
+          produto.quantidade
+        );
+      }
+    }
+
+    res.status(200).json({ mensagem: "E-mails enviados com sucesso." });
+  } catch (error) {
+    console.error("Erro ao enviar e-mails:", error);
+    res.status(500).json({ erro: "Erro ao enviar e-mails." });
   }
 });
 
@@ -94,19 +116,16 @@ router.delete("/:id", async (req, res) => {
 });
 
 // Exportar para Excel
-const XLSX = require("xlsx");
-
 router.get("/exportar/excel", async (req, res) => {
   try {
     const produtos = await Produto.find().populate("categoria");
 
-    // Formatando os dados para o Excel
     const dadosFormatados = produtos.map((produto, index) => ({
       "Nome do Produto": produto.nome,
       "Quantidade em Estoque": produto.quantidade,
       "Preço Unitário": produto.preco,
-      Corredor: produto.localizacao?.corredor || "-", // Ajuste aqui
-      Prateleira: produto.localizacao?.prateleira || "-", // Ajuste aqui
+      Corredor: produto.localizacao?.corredor || "-",
+      Prateleira: produto.localizacao?.prateleira || "-",
       Categoria: produto.categoria ? produto.categoria.nome : "Sem Categoria",
       "Valor Total em Estoque": {
         f: `C${index + 2}*B${index + 2}`,
@@ -117,32 +136,28 @@ router.get("/exportar/excel", async (req, res) => {
 
     const ws = XLSX.utils.json_to_sheet(dadosFormatados);
 
-    // Definir largura das colunas
     ws["!cols"] = [
-      { wch: 30 }, // Nome do Produto
-      { wch: 20 }, // Quantidade
-      { wch: 15 }, // Preço
-      { wch: 15 }, // Corredor
-      { wch: 15 }, // Prateleira
-      { wch: 25 }, // Categoria
-      { wch: 25 }, // Valor Total
+      { wch: 30 },
+      { wch: 20 },
+      { wch: 15 },
+      { wch: 15 },
+      { wch: 15 },
+      { wch: 25 },
+      { wch: 25 },
     ];
 
-    // Estilo do cabeçalho
     const headerStyle = {
       font: { bold: true, color: { rgb: "FFFFFF" } },
       fill: { fgColor: { rgb: "4472C4" } },
       alignment: { horizontal: "center" },
     };
 
-    // Aplicar estilo ao cabeçalho
     const numColunas = Object.keys(dadosFormatados[0]).length;
     for (let col = 0; col < numColunas; col++) {
       const cellRef = XLSX.utils.encode_cell({ r: 0, c: col });
       if (ws[cellRef]) ws[cellRef].s = headerStyle;
     }
 
-    // Formatar colunas numéricas
     const moneyFormat = '"R$"#,##0.00';
     for (let i = 0; i < produtos.length; i++) {
       const linha = i + 2;

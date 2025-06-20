@@ -10,10 +10,12 @@ const categoriaRoutes = require("./routes/categoriaRoutes");
 
 const app = express();
 
-app.use(cors({
-  origin: 'http://localhost:3000',
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    credentials: true,
+  })
+);
 
 //Config JSON response
 app.use(express.json());

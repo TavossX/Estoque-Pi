@@ -207,20 +207,26 @@ function Stock() {
   const handleAdicionarProduto = async () => {
     const token = localStorage.getItem("token");
 
-    if (!nomeProduto.trim() || !quantidade || !preco || !categoria) {
+    if (
+      !nomeProduto.trim() ||
+      quantidade === "" ||
+      preco === "" ||
+      !categoria
+    ) {
       alert("Por favor, preencha todos os campos");
       return;
     }
 
     const novoProduto = {
       nome: nomeProduto.trim(),
-      quantidade: Number(quantidade),
-      preco: Number(preco),
+      quantidade: parseInt(quantidade, 10),
+      preco: parseFloat(preco),
       localizacao: {
         corredor: corredor.trim(),
         prateleira: prateleira.trim(),
       },
       categoria,
+      // não envia usuarioId, backend pegará do token
     };
 
     try {
@@ -235,7 +241,12 @@ function Stock() {
 
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.message || `Erro ${res.status}`);
+        throw new Error(
+          errorData.message ||
+            errorData.erro ||
+            errorData.msg ||
+            `Erro ${res.status}`
+        );
       }
 
       const produtoCriado = await res.json();
@@ -245,6 +256,7 @@ function Stock() {
       }
 
       setProdutos((prev) => [...prev, produtoCriado]);
+
       setNomeProduto("");
       setQuantidade("");
       setPreco("");
