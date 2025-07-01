@@ -16,7 +16,9 @@ const ModalGrafico = ({ show, onClose, children, title }) => {
           &times;
         </button>
         {title && <h2 className="text-2xl font-bold mb-4">{title}</h2>}
-        <div>{children}</div>
+        {/* === AQUI ESTÁ A MUDANÇA PRINCIPAL === */}
+        {/* Adiciona max-h-[80vh] (80% da altura da viewport) e overflow-y-auto para rolagem vertical */}
+        <div className="max-h-[80vh] overflow-y-auto pr-2">{children}</div>
       </div>
     </div>
   );

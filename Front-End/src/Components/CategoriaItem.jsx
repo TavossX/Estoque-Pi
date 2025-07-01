@@ -1,6 +1,10 @@
 import { useState } from "react";
 
-export default function CategoriaItem({ categoria, handleEditar, handleExcluir }) {
+export default function CategoriaItem({
+  categoria,
+  handleEditar,
+  handleExcluir,
+}) {
   const [showModal, setShowModal] = useState(false);
 
   const openModal = () => setShowModal(true);
@@ -9,7 +13,9 @@ export default function CategoriaItem({ categoria, handleEditar, handleExcluir }
   return (
     <>
       <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded shadow-sm flex justify-between items-center">
-        <p className="text-black dark:text-white font-medium">{categoria.nome}</p>
+        <p className="text-black dark:text-white font-medium">
+          {categoria.nome}
+        </p>
 
         <div className="flex gap-2">
           <button

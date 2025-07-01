@@ -1,4 +1,4 @@
-import CategoriaItem from "./CategoriaItem"; // Importe corretamente
+import CategoriaItem from "./CategoriaItem";
 
 export default function Categorias({
   categorias,
@@ -33,15 +33,21 @@ export default function Categorias({
         <p className="mb-2 font-medium dark:text-white">
           Categorias Existentes
         </p>
-        <div className="flex flex-col gap-2">
-          {categorias.map((cat) => (
-            <CategoriaItem
-              key={cat._id}
-              categoria={cat}
-              handleEditar={handleEditarCategoria}
-              handleExcluir={handleExcluirCategoria}
-            />
-          ))}
+        <div className="max-h-[460px] overflow-y-auto space-y-4">
+          {categorias.length > 0 ? (
+            categorias.map((cat) => (
+              <CategoriaItem
+                key={cat._id}
+                categoria={cat}
+                handleEditar={handleEditarCategoria}
+                handleExcluir={handleExcluirCategoria}
+              />
+            ))
+          ) : (
+            <p className="text-gray-500 dark:text-gray-400">
+              Nenhuma categoria cadastrada.
+            </p>
+          )}
         </div>
       </div>
     </div>

@@ -35,10 +35,10 @@ const DashBoard = ({ onLogout, setAbaAtiva, abaAtiva }) => {
         </li>
 
         {/* CATEGORIAS */}
-        <li className="flex-center cursor-pointer w-full whitespace-nowrap">
+        <li className="flex-center cursor-pointer max-h-[490px] whitespace-nowrap overflow-y-auto">
           <button
             onClick={() => setAbaAtiva("categorias")}
-            className={`flex size-full gap-4 p-4 font-semibold rounded-xl bg-cover transition-all ease-linear
+            className={`flex size-full gap-4 p-4 font-semibold rounded-xl  bg-cover transition-all ease-linear
               ${
                 abaAtiva === "categorias"
                   ? "bg-gradient-to-r from-blue-400 to-blue-600 text-white"

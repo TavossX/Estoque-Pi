@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { API_URL } from "../Services/Api";
+import LoadingScreen from "../Components/LoadingScreen";
 
 function Auth() {
   const [isLogin, setIsLogin] = useState(true);
@@ -12,6 +13,8 @@ function Auth() {
   const [erro, setErro] = useState("");
   const successMsg = "Cadastro Realizado com sucesso!";
   const [isLoading, setIsLoading] = useState(false);
+
+  const [mostrarLoadingRedirect, setMostrarLoadingRedirect] = useState(false);
 
   const navigate = useNavigate();
 
@@ -72,7 +75,13 @@ function Auth() {
 
       if (isLogin) {
         localStorage.setItem("token", data.token);
-        navigate("/stock");
+
+        // Mostra tela de loading antes de navegar
+        setMostrarLoadingRedirect(true);
+
+        setTimeout(() => {
+          navigate("/stock");
+        }, 2000); // 2 segundos de loading
       } else {
         // Limpa os campos após cadastro
         setFormData({
@@ -90,6 +99,10 @@ function Auth() {
       setIsLoading(false);
     }
   };
+
+  if (mostrarLoadingRedirect) {
+    return <LoadingScreen />;
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">

@@ -1,7 +1,6 @@
-// components/ResumoEstoque.jsx
 import React, { useState } from "react";
 import Chart from "react-apexcharts";
-import Modal from "./ModalGrafico"; // Ajuste o caminho se necessário
+import Modal from "./ModalGrafico";
 
 export default function ResumoEstoque({ produtos }) {
   const [showModal, setShowModal] = useState(false);
@@ -12,166 +11,98 @@ export default function ResumoEstoque({ produtos }) {
   const estoqueBaixo = produtos.filter((p) => p.quantidade <= 5).length;
   const unidadesEstoque = produtos.reduce((acc, p) => acc + p.quantidade, 0);
 
-  // --- Funções para gerar dados do gráfico ---
-
-  const getProdutoOptions = () => {
-    return {
-      chart: {
-        id: "basic-bar",
-        toolbar: {
-          show: false,
-        },
-      },
-      xaxis: {
-        categories: ["Total de Produtos"],
-      },
-      dataLabels: {
-        enabled: false,
-      },
-      plotOptions: {
-        bar: {
-          horizontal: true,
-        },
-      },
-      title: {
-        text: "Visão Geral dos Produtos",
-        align: "left",
-      },
-    };
-  };
-
-  const getProdutoSeries = () => {
-    return [
-      {
-        name: "Produtos",
-        data: [totalProdutos],
-      },
-    ];
-  };
-
-  const getEstoqueBaixoOptions = () => {
-    return {
-      chart: {
-        id: "estoque-baixo-donut",
-      },
-      labels: ["Em Estoque Normal", "Em Estoque Baixo"],
-      responsive: [
-        {
-          breakpoint: 480,
-          options: {
-            chart: {
-              width: 200,
-            },
-            legend: {
-              position: "bottom",
-            },
-          },
-        },
-      ],
-      title: {
-        text: "Produtos com Estoque Baixo",
-        align: "left",
-      },
-    };
-  };
+  // Gráfico 1: Estoque Baixo
+  const getEstoqueBaixoOptions = () => ({
+    chart: { id: "estoque-baixo-donut" },
+    labels: ["Estoque Normal", "Estoque Baixo"],
+    legend: { position: "bottom" },
+    tooltip: { y: { formatter: (val) => `${val} produtos` } },
+  });
 
   const getEstoqueBaixoSeries = () => {
     const estoqueNormal = totalProdutos - estoqueBaixo;
     return [estoqueNormal, estoqueBaixo];
   };
 
-  const getUnidadesEstoqueOptions = () => {
-    // Para este gráfico, vamos mostrar a quantidade de cada produto individualmente, se houver dados suficientes.
-    // Ou uma visão geral por tipo de produto, se você tiver essa categoria.
-    // Por simplicidade, farei um gráfico de barras com os 5 produtos com mais unidades.
-    const sortedProducts = [...produtos].sort(
-      (a, b) => b.quantidade - a.quantidade
-    );
-    const top5Products = sortedProducts.slice(0, 5);
+  // Gráfico 2: Top Produtos (barras coloridas)
+  const getTopProdutosData = () => {
+    const topProdutos = [...produtos]
+      .sort((a, b) => b.quantidade - a.quantidade)
+      .slice(0, 10);
 
     return {
-      chart: {
-        id: "unidades-estoque-bar",
-        toolbar: {
-          show: false,
+      options: {
+        chart: { id: "top-produtos-bar" },
+        xaxis: {
+          categories: topProdutos.map((p) => p.nome),
+          labels: { show: false },
         },
-      },
-      xaxis: {
-        categories: top5Products.map((p) => p.nome || `Produto ${p.id}`), // Assumindo que seu produto tem 'nome' ou 'id'
-      },
-      dataLabels: {
-        enabled: false,
-      },
-      plotOptions: {
-        bar: {
-          columnWidth: "50%",
-          distributed: true, // Cores diferentes para cada barra
+        plotOptions: {
+          bar: {
+            distributed: true,
+          },
         },
+        colors: [
+          "#4F46E5",
+          "#22C55E",
+          "#F59E0B",
+          "#EF4444",
+          "#3B82F6",
+          "#10B981",
+          "#E11D48",
+          "#8B5CF6",
+          "#EC4899",
+          "#14B8A6",
+        ],
+        tooltip: { y: { formatter: (val) => `${val} unidades` } },
+        legend: { show: false },
       },
-      title: {
-        text: "Top 5 Produtos por Unidades em Estoque",
-        align: "left",
-      },
+      series: [
+        {
+          name: "Unidades",
+          data: topProdutos.map((p) => p.quantidade),
+        },
+      ],
     };
   };
 
-  const getUnidadesEstoqueSeries = () => {
-    const sortedProducts = [...produtos].sort(
-      (a, b) => b.quantidade - a.quantidade
-    );
-    const top5Products = sortedProducts.slice(0, 5);
-
-    return [
-      {
-        name: "Unidades",
-        data: top5Products.map((p) => p.quantidade),
-      },
-    ];
-  };
-
-  // --- Funções para abrir o modal ---
-
+  // Modal
   const openModal = (type) => {
     let content;
     let title = "";
+    let chartHeight = 280;
+
     switch (type) {
-      case "totalProdutos":
-        content = (
-          <Chart
-            options={getProdutoOptions()}
-            series={getProdutoSeries()}
-            type="bar"
-            height={250}
-          />
-        );
-        title = "Gráfico: Total de Produtos";
-        break;
       case "estoqueBaixo":
         content = (
           <Chart
             options={getEstoqueBaixoOptions()}
             series={getEstoqueBaixoSeries()}
             type="donut"
-            height={250}
+            height={chartHeight}
           />
         );
         title = "Gráfico: Produtos com Estoque Baixo";
         break;
-      case "unidadesEstoque":
+
+      case "topProdutos":
+        const topData = getTopProdutosData();
         content = (
           <Chart
-            options={getUnidadesEstoqueOptions()}
-            series={getUnidadesEstoqueSeries()}
+            options={topData.options}
+            series={topData.series}
             type="bar"
-            height={250}
+            height={chartHeight + 40}
           />
         );
-        title = "Gráfico: Unidades de Estoque";
+        title = "Gráfico: Top 10 Produtos com Mais Unidades";
         break;
+
       default:
-        content = <p>Nenhum gráfico disponível.</p>;
-        break;
+        content = <p>Nenhum gráfico disponível para esta opção.</p>;
+        title = "Informação";
     }
+
     setModalContent(content);
     setModalTitle(title);
     setShowModal(true);
@@ -188,23 +119,25 @@ export default function ResumoEstoque({ produtos }) {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <div
           className="bg-blue-600 text-white p-4 rounded-lg cursor-pointer hover:bg-blue-700 transition-colors"
-          onClick={() => openModal("totalProdutos")}
+          onClick={() => openModal("topProdutos")}
         >
-          <p>Total de Produtos</p>
+          <p className="text-xl font-semibold">Total de Produtos</p>
           <h2 className="text-2xl font-bold">{totalProdutos}</h2>
         </div>
+
         <div
           className="bg-orange-500 text-white p-4 rounded-lg cursor-pointer hover:bg-orange-600 transition-colors"
           onClick={() => openModal("estoqueBaixo")}
         >
-          <p>Estoque Baixo</p>
+          <p className="text-xl font-semibold">Estoque Baixo</p>
           <h2 className="text-2xl font-bold">{estoqueBaixo}</h2>
         </div>
+
         <div
           className="bg-green-600 text-white p-4 rounded-lg cursor-pointer hover:bg-green-700 transition-colors"
           onClick={() => openModal("unidadesEstoque")}
         >
-          <p>Unidades de Estoque</p>
+          <p className="text-xl font-semibold">Unidades de Estoque</p>
           <h2 className="text-2xl font-bold">{unidadesEstoque}</h2>
         </div>
       </div>
